@@ -224,14 +224,23 @@
   .log-btn:active { transform: scale(0.95); opacity: 0.8; }
   .log-btn .icon { font-size: 1.6rem; }
   .btn-resisted {
-    background: rgba(183,228,199,0.35);
-    border: 0.5px solid rgba(183,228,199,0.5);
-    color: var(--primary);
+    background: rgba(45,106,79,0.85);
+    border: 0.5px solid rgba(45,106,79,0.3);
+    color: white;
+    box-shadow: 0 2px 8px rgba(45,106,79,0.2);
   }
   .btn-slipped {
-    background: rgba(214,69,69,0.1);
-    border: 0.5px solid rgba(214,69,69,0.2);
-    color: var(--danger);
+    background: #d03030;
+    border: 0.5px solid #c02020;
+    color: white;
+    box-shadow: 0 2px 8px rgba(208,48,48,0.25);
+  }
+  .trigger-panel.slipped-bg {
+    background: rgba(214,69,69,0.06);
+    border-radius: var(--radius-sm);
+    margin-top: 14px;
+    padding: 14px;
+    border-top: none;
   }
 
   /* ---- Trigger picker ---- */
@@ -829,6 +838,7 @@
     .chip.selected { background: var(--primary); color: #fff; }
     .note-input, .datetime-input { background: rgba(255,255,255,0.06); color: var(--text); border-color: rgba(255,255,255,0.1); }
     .toast { background: rgba(30,40,34,0.95); color: var(--text); }
+    .trigger-panel.slipped-bg { background: rgba(224,96,96,0.08); }
   }
 </style>
 </head>
@@ -883,7 +893,12 @@
         <span class="chip" role="button" aria-pressed="false" data-t="boredom" onclick="pickTrigger(this)">Boredom</span>
         <span class="chip" role="button" aria-pressed="false" data-t="idle" onclick="pickTrigger(this)">Idle hands</span>
         <span class="chip" role="button" aria-pressed="false" data-t="rough-edge" onclick="pickTrigger(this)">Rough edge</span>
-        <span class="chip" role="button" aria-pressed="false" data-t="focus" onclick="pickTrigger(this)">Deep focus</span>
+      </div>
+      <label>Where?</label>
+      <div class="trigger-chips" id="locationChips">
+        <span class="chip" role="button" aria-pressed="false" data-l="home" onclick="pickLocation(this)">Home</span>
+        <span class="chip" role="button" aria-pressed="false" data-l="office" onclick="pickLocation(this)">Office</span>
+        <span class="chip" role="button" aria-pressed="false" data-l="social" onclick="pickLocation(this)">Social setting</span>
       </div>
       <div class="coping-section" id="copingSection" style="display:none;">
         <label>How did you cope?</label>
@@ -917,7 +932,7 @@
     <div class="cal-grid" id="calGrid"></div>
     <div class="cal-legend">
       <div class="legend-item"><div class="legend-dot" style="background:var(--primary)"></div>Clean</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#f8b4b4"></div>Slipped</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(199,62,62,0.45)"></div>Slipped</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--warning-light)"></div>Mixed</div>
       <div class="legend-item"><div class="legend-dot" style="background:#f0f0f4"></div>No data</div>
     </div>
@@ -1064,10 +1079,6 @@
       <div class="ref-row">
         <div class="ref-trigger">Rough edge found</div>
         <div class="ref-action">File it smooth, apply cuticle oil</div>
-      </div>
-      <div class="ref-row">
-        <div class="ref-trigger">Deep focus</div>
-        <div class="ref-action">Keep hands below desk; hold pen or stress ball</div>
       </div>
       <div class="ref-row">
         <div class="ref-trigger">General urge</div>
@@ -1235,6 +1246,7 @@ let entries = [];
 let pendingType = null;
 let pendingTrigger = null;
 let pendingCoping = null;
+let pendingLocation = null;
 let editingId = null;
 let calYear, calMonth;
 
@@ -1281,8 +1293,10 @@ function startLog(type) {
   pendingType = type;
   pendingTrigger = null;
   pendingCoping = null;
-  document.querySelectorAll('#triggerChips .chip').forEach(c => c.classList.remove('selected'));
-  document.querySelectorAll('#copingChips .chip').forEach(c => c.classList.remove('selected'));
+  pendingLocation = null;
+  document.querySelectorAll('#triggerChips .chip').forEach(c => { c.classList.remove('selected'); c.setAttribute('aria-pressed', 'false'); });
+  document.querySelectorAll('#copingChips .chip').forEach(c => { c.classList.remove('selected'); c.setAttribute('aria-pressed', 'false'); });
+  document.querySelectorAll('#locationChips .chip').forEach(c => { c.classList.remove('selected'); c.setAttribute('aria-pressed', 'false'); });
   document.getElementById('noteInput').value = '';
 
   // Set datetime default to now (in local timezone format for the input)
@@ -1294,8 +1308,11 @@ function startLog(type) {
   // Show coping methods only for resisted
   document.getElementById('copingSection').style.display = (type === 'resisted') ? 'block' : 'none';
 
-  document.getElementById('triggerPanel').classList.add('visible');
-  document.getElementById('triggerPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  // Tint background for slipped
+  const panel = document.getElementById('triggerPanel');
+  panel.classList.toggle('slipped-bg', type === 'slipped');
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function pickTrigger(el) {
@@ -1310,6 +1327,13 @@ function pickCoping(el) {
   el.classList.add('selected');
   el.setAttribute('aria-pressed', 'true');
   pendingCoping = el.dataset.c;
+}
+
+function pickLocation(el) {
+  document.querySelectorAll('#locationChips .chip').forEach(c => { c.classList.remove('selected'); c.setAttribute('aria-pressed', 'false'); });
+  el.classList.add('selected');
+  el.setAttribute('aria-pressed', 'true');
+  pendingLocation = el.dataset.l;
 }
 
 async function saveEntry() {
@@ -1328,6 +1352,7 @@ async function saveEntry() {
       type: pendingType,
       trigger: pendingTrigger || null,
       coping: pendingType === 'resisted' ? (pendingCoping || null) : null,
+      location: pendingLocation || null,
       note: document.getElementById('noteInput')?.value?.trim() || null,
       timestamp: entryTime.toISOString(),
       date: formatDate(entryTime),
@@ -1345,6 +1370,7 @@ async function saveEntry() {
       type: pendingType,
       trigger: pendingTrigger || null,
       coping: pendingCoping || null,
+      location: pendingLocation || null,
       note: document.getElementById('noteInput')?.value?.trim() || null,
       timestamp: entryTime.toISOString(),
       date: formatDate(entryTime),
@@ -1360,9 +1386,12 @@ async function saveEntry() {
   pendingType = null;
   pendingTrigger = null;
   pendingCoping = null;
-  document.getElementById('triggerPanel').classList.remove('visible');
+  pendingLocation = null;
+  const panel = document.getElementById('triggerPanel');
+  panel.classList.remove('visible');
+  panel.classList.remove('slipped-bg');
   document.getElementById('copingSection').style.display = 'none';
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.chip').forEach(c => { c.classList.remove('selected'); c.setAttribute('aria-pressed', 'false'); });
   renderAll();
 }
 
@@ -1378,6 +1407,7 @@ function editEntry(id) {
   pendingType = entry.type;
   pendingTrigger = entry.trigger;
   pendingCoping = entry.coping;
+  pendingLocation = entry.location || null;
 
   // Set datetime
   const d = new Date(entry.timestamp);
@@ -1387,21 +1417,34 @@ function editEntry(id) {
 
   // Select trigger chip
   document.querySelectorAll('#triggerChips .chip').forEach(c => {
-    c.classList.toggle('selected', c.dataset.t === entry.trigger);
+    const sel = c.dataset.t === entry.trigger;
+    c.classList.toggle('selected', sel);
+    c.setAttribute('aria-pressed', sel ? 'true' : 'false');
+  });
+
+  // Select location chip
+  document.querySelectorAll('#locationChips .chip').forEach(c => {
+    const sel = c.dataset.l === (entry.location || '');
+    c.classList.toggle('selected', sel);
+    c.setAttribute('aria-pressed', sel ? 'true' : 'false');
   });
 
   // Show/select coping
   document.getElementById('copingSection').style.display = isResisted(entry) ? 'block' : 'none';
   document.querySelectorAll('#copingChips .chip').forEach(c => {
-    c.classList.toggle('selected', c.dataset.c === entry.coping);
+    const sel = c.dataset.c === entry.coping;
+    c.classList.toggle('selected', sel);
+    c.setAttribute('aria-pressed', sel ? 'true' : 'false');
   });
 
   // Set note
   document.getElementById('noteInput').value = entry.note || '';
 
-  // Show panel
-  document.getElementById('triggerPanel').classList.add('visible');
-  document.getElementById('triggerPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  // Show panel with correct background
+  const panel = document.getElementById('triggerPanel');
+  panel.classList.toggle('slipped-bg', entry.type === 'slipped');
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 let undoEntry = null;
@@ -1667,13 +1710,14 @@ function renderHistory() {
     }
 
     const trigger = entry.trigger ? ' &middot; ' + escHtml(entry.trigger) : '';
+    const location = entry.location ? ' &middot; ' + escHtml(capitalize(entry.location)) : '';
     const coping = entry.coping ? ' &middot; ' + escHtml(capitalize(entry.coping)) : '';
     const note = entry.note ? '<div class="log-note">' + escHtml(entry.note) + '</div>' : '';
 
     html += '<div class="log-entry">' +
       '<div class="log-dot ' + info.cls + '">' + info.icon + '</div>' +
       '<div class="log-info"><div class="log-type">' + info.label + '</div>' +
-      '<div class="log-meta">' + timeStr + trigger + coping + '</div>' + note + '</div>' +
+      '<div class="log-meta">' + timeStr + trigger + location + coping + '</div>' + note + '</div>' +
       '<button class="log-edit" onclick="editEntry(' + entry.id + ')">&#9998;</button>' +
       '<button class="log-del" onclick="deleteEntry(' + entry.id + ')">&times;</button></div>';
   });
