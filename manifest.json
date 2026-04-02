@@ -4,7 +4,7 @@
   "description": "Track urges, log streaks, break the habit",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f5f4f0",
+  "background_color": "#e8efe8",
   "theme_color": "#1a4731",
   "orientation": "portrait",
   "icons": [

@@ -13,25 +13,25 @@
 <style>
   :root {
     --bg: #e8efe8;
-    --card: rgba(255,255,255,0.55);
-    --card-border: rgba(255,255,255,0.7);
+    --card: rgba(255,255,255,0.6);
+    --card-border: rgba(255,255,255,0.75);
     --card-blur: 24px;
     --primary: #2d6a4f;
     --primary-dark: #1a4731;
     --primary-light: #b7e4c7;
     --primary-faint: rgba(183,228,199,0.3);
     --accent: #d4a373;
-    --danger: #d64545;
-    --danger-light: rgba(253,232,232,0.7);
-    --warning: #e6a817;
-    --warning-light: rgba(254,243,214,0.7);
+    --danger: #c73e3e;
+    --danger-light: rgba(199,62,62,0.1);
+    --warning: #c99a12;
+    --warning-light: rgba(201,154,18,0.1);
     --text: #1a1a2e;
-    --text-secondary: #5a5a72;
-    --text-muted: #9a9ab0;
+    --text-secondary: #3d3d56;
+    --text-muted: #6a6a82;
     --border: rgba(255,255,255,0.5);
-    --shadow-sm: 0 1px 4px rgba(0,0,0,0.03);
-    --shadow: 0 4px 20px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.03);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,0.08);
+    --shadow-sm: 0 1px 4px rgba(0,0,0,0.15);
+    --shadow: 0 4px 20px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.2);
     --radius: 20px;
     --radius-sm: 14px;
     --safe-top: env(safe-area-inset-top, 0px);
@@ -59,7 +59,7 @@
     position: fixed;
     bottom: 0;
     left: 0; right: 0;
-    background: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.7);
     backdrop-filter: blur(30px) saturate(1.5);
     -webkit-backdrop-filter: blur(30px) saturate(1.5);
     border-top: 0.5px solid rgba(255,255,255,0.8);
@@ -78,7 +78,7 @@
     padding: 6px 8px;
     cursor: pointer;
     color: var(--text-muted);
-    font-size: 0.6rem;
+    font-size: 0.7rem;
     font-weight: 500;
     transition: color 0.2s;
   }
@@ -170,13 +170,13 @@
     box-shadow: var(--shadow);
   }
   .stat-value {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     font-weight: 800;
     color: var(--primary);
     letter-spacing: -0.5px;
   }
   .stat-label {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.8px;
@@ -196,7 +196,7 @@
     box-shadow: var(--shadow);
   }
   .card h2 {
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 700;
     margin-bottom: 14px;
     color: var(--text);
@@ -210,7 +210,7 @@
     border: none;
     border-radius: var(--radius-sm);
     padding: 18px 12px;
-    font-size: 0.82rem;
+    font-size: 0.9rem;
     font-weight: 700;
     cursor: pointer;
     transition: transform 0.1s, opacity 0.15s;
@@ -239,11 +239,11 @@
     display: none;
     margin-top: 14px;
     padding-top: 14px;
-    border-top: 1px solid var(--border);
+    border-top: 0.5px solid rgba(0,0,0,0.06);
   }
   .trigger-panel.visible { display: block; }
   .trigger-panel label {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: var(--text-secondary);
     font-weight: 600;
     display: block;
@@ -256,13 +256,13 @@
     margin-bottom: 14px;
   }
   .chip {
-    border: 1px solid rgba(255,255,255,0.6);
-    background: rgba(255,255,255,0.45);
+    border: 1px solid rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.5);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-radius: 20px;
-    padding: 7px 16px;
-    font-size: 0.8rem;
+    padding: 8px 16px;
+    font-size: 0.85rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.15s;
@@ -271,9 +271,9 @@
     user-select: none;
   }
   .chip.selected {
-    background: rgba(45,106,79,0.85);
+    background: var(--primary);
     color: white;
-    border-color: rgba(45,106,79,0.4);
+    border-color: var(--primary);
   }
   .datetime-row {
     display: flex;
@@ -281,19 +281,19 @@
     justify-content: space-between;
     margin-bottom: 14px;
     padding-bottom: 14px;
-    border-bottom: 0.5px solid rgba(255,255,255,0.5);
+    border-bottom: 0.5px solid rgba(0,0,0,0.06);
   }
   .datetime-row label {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: var(--text-secondary);
     font-weight: 600;
   }
   .datetime-input {
-    border: 1px solid rgba(255,255,255,0.6);
-    background: rgba(255,255,255,0.45);
+    border: 1px solid rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.5);
     border-radius: 10px;
     padding: 8px 12px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-family: inherit;
     color: var(--text);
     outline: none;
@@ -304,11 +304,11 @@
   }
   .note-input {
     width: 100%;
-    border: 1px solid rgba(255,255,255,0.6);
-    background: rgba(255,255,255,0.45);
+    border: 1px solid rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.5);
     border-radius: var(--radius-sm);
     padding: 10px 14px;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-family: inherit;
     margin-bottom: 14px;
     outline: none;
@@ -362,7 +362,7 @@
     gap: 3px;
   }
   .cal-hdr {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
     text-align: center;
     padding: 6px 0;
@@ -376,17 +376,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 500;
     color: var(--text-muted);
     position: relative;
   }
   .cal-cell.empty { background: transparent; }
-  .cal-cell.no-data { background: rgba(255,255,255,0.3); }
-  .cal-cell.clean { background: rgba(45,106,79,0.8); color: white; font-weight: 700; }
-  .cal-cell.resisted { background: rgba(183,228,199,0.5); color: var(--primary-dark); font-weight: 700; }
-  .cal-cell.slipped { background: rgba(214,69,69,0.2); color: #8b1a1a; font-weight: 700; }
-  .cal-cell.mixed { background: rgba(230,168,23,0.2); color: #7a5e0a; font-weight: 700; }
+  .cal-cell.no-data { background: rgba(255,255,255,0.35); }
+  .cal-cell.clean { background: var(--primary); color: white; font-weight: 700; }
+  .cal-cell.resisted { background: rgba(183,228,199,0.6); color: var(--primary-dark); font-weight: 700; }
+  .cal-cell.slipped { background: rgba(199,62,62,0.2); color: #8b1a1a; font-weight: 700; }
+  .cal-cell.mixed { background: rgba(201,154,18,0.25); color: #7a5e0a; font-weight: 700; }
   .cal-cell.today::after {
     content: '';
     position: absolute;
@@ -407,7 +407,7 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: 0.7rem;
+    font-size: 0.78rem;
     color: var(--text-muted);
   }
   .legend-dot {
@@ -423,7 +423,7 @@
     align-items: center;
     gap: 12px;
     padding: 12px 0;
-    border-bottom: 0.5px solid var(--border);
+    border-bottom: 0.5px solid rgba(0,0,0,0.06);
   }
   .log-entry:last-child { border-bottom: none; }
   .log-dot {
@@ -436,14 +436,14 @@
     font-size: 1.1rem;
     flex-shrink: 0;
   }
-  .log-dot.resisted { background: var(--primary-faint); }
-  .log-dot.slipped { background: var(--danger-light); }
-  .log-dot.used-tool { background: var(--warning-light); }
-  .log-dot.clean-day { background: #e8f5ee; }
+  .log-dot.resisted { background: rgba(183,228,199,0.4); }
+  .log-dot.slipped { background: rgba(199,62,62,0.12); }
+  .log-dot.used-tool { background: rgba(183,228,199,0.4); }
+  .log-dot.clean-day { background: rgba(183,228,199,0.4); }
   .log-info { flex: 1; min-width: 0; }
-  .log-type { font-size: 0.85rem; font-weight: 600; }
-  .log-meta { font-size: 0.75rem; color: var(--text-muted); }
-  .log-note { font-size: 0.75rem; color: var(--text-secondary); font-style: italic; margin-top: 2px; }
+  .log-type { font-size: 0.9rem; font-weight: 600; }
+  .log-meta { font-size: 0.8rem; color: var(--text-muted); }
+  .log-note { font-size: 0.8rem; color: var(--text-secondary); font-style: italic; margin-top: 2px; }
   .log-del {
     background: none;
     border: none;
@@ -479,7 +479,7 @@
     box-shadow: var(--shadow);
   }
   .insight-card h3 {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: var(--text-secondary);
     text-transform: uppercase;
@@ -493,8 +493,8 @@
     margin-bottom: 8px;
   }
   .bar-label {
-    width: 70px;
-    font-size: 0.78rem;
+    width: 76px;
+    font-size: 0.82rem;
     color: var(--text-secondary);
     font-weight: 500;
     flex-shrink: 0;
@@ -502,7 +502,7 @@
   .bar-track {
     flex: 1;
     height: 8px;
-    background: rgba(255,255,255,0.4);
+    background: rgba(0,0,0,0.06);
     border-radius: 4px;
     overflow: hidden;
   }
@@ -527,35 +527,35 @@
     align-items: center;
     justify-content: space-between;
     padding: 14px 0;
-    border-bottom: 0.5px solid var(--border);
+    border-bottom: 0.5px solid rgba(0,0,0,0.06);
   }
   .setting-row:last-child { border-bottom: none; }
   .setting-label {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 500;
   }
   .setting-desc {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: var(--text-muted);
     margin-top: 2px;
   }
   .danger-btn {
-    background: var(--danger-light);
+    background: rgba(199,62,62,0.08);
     color: var(--danger);
-    border: none;
+    border: 0.5px solid rgba(199,62,62,0.2);
     border-radius: 8px;
     padding: 8px 18px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
   }
   .export-btn {
-    background: var(--primary-faint);
+    background: rgba(45,106,79,0.08);
     color: var(--primary);
-    border: none;
+    border: 0.5px solid rgba(45,106,79,0.2);
     border-radius: 8px;
     padding: 8px 18px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
   }
@@ -572,7 +572,7 @@
   }
   .modal-overlay.visible { display: flex; }
   .modal-sheet {
-    background: rgba(255,255,255,0.75);
+    background: rgba(255,255,255,0.8);
     backdrop-filter: blur(40px) saturate(1.8);
     -webkit-backdrop-filter: blur(40px) saturate(1.8);
     border: 0.5px solid rgba(255,255,255,0.8);
@@ -607,7 +607,7 @@
     font-weight: 700;
     cursor: pointer;
   }
-  .modal-cancel { background: var(--border); color: var(--text); }
+  .modal-cancel { background: #e0e0e0; color: var(--text); }
   .modal-confirm { background: var(--danger); color: white; }
 
   /* ---- Toast ---- */
@@ -638,7 +638,7 @@
 
   /* ---- Date grouping ---- */
   .date-group {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 700;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -678,17 +678,17 @@
     min-height: 2px;
     transition: height 0.3s ease;
   }
-  .week-bar.positive { background: var(--primary-light); }
-  .week-bar.negative { background: #f8b4b4; }
+  .week-bar.positive { background: rgba(183,228,199,0.7); }
+  .week-bar.negative { background: rgba(199,62,62,0.3); }
   .week-day-label {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
     font-weight: 600;
   }
 
   /* ---- Guide page ---- */
   .guide-card h2 {
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 700;
     margin-bottom: 14px;
   }
@@ -718,32 +718,32 @@
   }
   .step-content { flex: 1; }
   .step-title {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: var(--text);
     margin-bottom: 2px;
   }
   .step-desc {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: var(--text-secondary);
-    line-height: 1.45;
+    line-height: 1.5;
   }
   .ref-table {
     border-radius: var(--radius-sm);
     overflow: hidden;
-    border: 0.5px solid rgba(255,255,255,0.6);
-    background: rgba(255,255,255,0.25);
+    border: 0.5px solid rgba(0,0,0,0.06);
+    background: rgba(255,255,255,0.3);
   }
   .ref-row {
     display: flex;
-    border-bottom: 0.5px solid var(--border);
-    font-size: 0.8rem;
+    border-bottom: 0.5px solid rgba(255,255,255,0.08);
+    font-size: 0.85rem;
   }
   .ref-row:last-child { border-bottom: none; }
   .ref-header {
-    background: rgba(183,228,199,0.25);
+    background: rgba(183,228,199,0.3);
     font-weight: 700;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--primary-dark);
@@ -753,7 +753,7 @@
     padding: 10px 12px;
     font-weight: 600;
     color: var(--text);
-    border-right: 0.5px solid var(--border);
+    border-right: 0.5px solid rgba(0,0,0,0.06);
     flex-shrink: 0;
   }
   .ref-action {
@@ -764,17 +764,17 @@
   }
   .technique {
     padding: 10px 0;
-    border-bottom: 0.5px solid var(--border);
+    border-bottom: 0.5px solid rgba(0,0,0,0.06);
   }
   .technique:last-child { border-bottom: none; }
   .tech-name {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: var(--primary);
     margin-bottom: 3px;
   }
   .tech-desc {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: var(--text-secondary);
     line-height: 1.5;
   }
