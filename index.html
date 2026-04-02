@@ -788,6 +788,60 @@
     line-height: 1.5;
   }
 
+  .streak-banner.milestone {
+    box-shadow: var(--shadow), 0 0 20px rgba(183,228,199,0.4);
+    border-color: rgba(183,228,199,0.3);
+  }
+  .streak-banner.milestone .streak-number {
+    animation: milestone-pulse 1.5s ease-in-out;
+  }
+  @keyframes milestone-pulse {
+    0%, 100% { transform: scale(1); }
+    30% { transform: scale(1.12); }
+    60% { transform: scale(1.05); }
+  }
+
+  .cal-note-dot {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .day-detail {
+    margin-top: 14px;
+    padding: 14px;
+    background: var(--card);
+    backdrop-filter: blur(var(--card-blur)) saturate(1.4);
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(1.4);
+    border: 0.5px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+  }
+  .day-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .day-detail-header h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+  }
+  .day-detail-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  .day-detail .log-entry { padding: 8px 0; }
+
   .undo-link {
     margin-left: 10px;
     font-weight: 700;
@@ -839,6 +893,8 @@
     .note-input, .datetime-input { background: rgba(255,255,255,0.06); color: var(--text); border-color: rgba(255,255,255,0.1); }
     .toast { background: rgba(30,40,34,0.95); color: var(--text); }
     .trigger-panel.slipped-bg { background: rgba(224,96,96,0.08); }
+    .day-detail { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); }
+    .streak-banner.milestone { box-shadow: var(--shadow), 0 0 20px rgba(92,184,138,0.25); }
   }
 </style>
 </head>
@@ -937,6 +993,8 @@
       <div class="legend-item"><div class="legend-dot" style="background:#f0f0f4"></div>No data</div>
     </div>
   </div>
+
+  <div id="dayDetail"></div>
 
   <div class="card" style="margin-top:4px;">
     <h2>This week</h2>
@@ -1362,6 +1420,7 @@ async function saveEntry() {
     entries[idx] = updated;
     editingId = null;
     haptic();
+    playSound(updated.type === 'slipped' ? 'slipped' : 'resisted');
     toast('Entry updated');
   } else {
     // Create new entry
@@ -1378,9 +1437,9 @@ async function saveEntry() {
     };
     await dbAdd(entry);
     entries.unshift(entry);
-    const msgs = { 'resisted': 'Urge resisted - nice one', 'slipped': 'Slip logged. Keep going.' };
     haptic();
-    toast(msgs[entry.type] || 'Saved');
+    playSound(entry.type === 'slipped' ? 'slipped' : 'resisted');
+    toast(randomMsg(entry.type));
   }
 
   pendingType = null;
@@ -1496,14 +1555,18 @@ function todayStr() { return formatDate(new Date()); }
 function getStreak() {
   if (entries.length === 0) return 0;
   let streak = 0;
+  let slipUsed = false; // two-day rule: one slip forgiven per streak
   const d = new Date();
   for (let i = 0; i < 730; i++) {
     const ds = formatDate(d);
     const dayE = entries.filter(e => e.date === ds);
     const hasSlip = dayE.some(e => e.type === 'slipped');
     const hasGood = dayE.some(e => e.type !== 'slipped');
-    if (hasSlip) break;
-    if (hasGood) {
+    if (hasSlip) {
+      if (slipUsed) break; // second slip breaks streak
+      slipUsed = true;     // first slip forgiven
+    }
+    if (hasGood || hasSlip) {
       streak++;
     } else if (i === 0) {
       // Today with no entries: continue counting
@@ -1520,19 +1583,27 @@ function getBest() {
   const dates = [...new Set(entries.map(e => e.date))].sort();
   const start = new Date(dates[0]);
   const end = new Date();
-  let best = 0, cur = 0;
+  let best = 0, cur = 0, slipUsed = false;
   const d = new Date(start);
   while (d <= end) {
     const ds = formatDate(d);
     const dayE = entries.filter(e => e.date === ds);
-    if (dayE.some(e => e.type === 'slipped')) {
-      best = Math.max(best, cur);
-      cur = 0;
+    const hasSlip = dayE.some(e => e.type === 'slipped');
+    if (hasSlip) {
+      if (slipUsed) {
+        best = Math.max(best, cur);
+        cur = 0;
+        slipUsed = true; // this slip starts a new forgiveness window
+      } else {
+        slipUsed = true;
+        cur++;
+      }
     } else if (dayE.length > 0) {
       cur++;
     } else {
       best = Math.max(best, cur);
       cur = 0;
+      slipUsed = false;
     }
     d.setDate(d.getDate() + 1);
   }
@@ -1560,8 +1631,24 @@ function renderStats() {
   const total = resisted + slipped;
   const rate = total > 0 ? Math.round((resisted / total) * 100) + '%' : '--';
 
-  document.getElementById('streakNum').textContent = getStreak();
+  const streak = getStreak();
+  document.getElementById('streakNum').textContent = streak;
   document.getElementById('streakBest').textContent = 'Best: ' + getBest() + ' days';
+
+  // Milestone celebrations
+  const milestones = [90, 60, 30, 14, 7, 3];
+  const banner = document.getElementById('streakNum').parentElement;
+  banner.classList.remove('milestone');
+  const hit = milestones.find(m => streak >= m);
+  if (hit) {
+    banner.classList.add('milestone');
+    // Show milestone toast once per milestone
+    const key = 'milestone_' + hit;
+    if (!sessionStorage.getItem(key) && streak === hit) {
+      sessionStorage.setItem(key, '1');
+      setTimeout(() => toast(streak + '-day streak! Keep it up!'), 300);
+    }
+  }
   document.getElementById('sResisted').textContent = resisted;
   document.getElementById('sSlipped').textContent = slipped;
   document.getElementById('sRate').textContent = rate;
@@ -1619,6 +1706,20 @@ function renderCalendar() {
     if (isCurrentMonth && d === todayD) cls += ' today';
     el.className = cls;
     el.textContent = d;
+
+    // Note indicator dot
+    if (dayE.some(e => e.note)) {
+      const dot = document.createElement('span');
+      dot.className = 'cal-note-dot';
+      el.appendChild(dot);
+    }
+
+    // Clickable day — show entries
+    if (!isFuture && dayE.length > 0) {
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', () => showDayDetail(ds, dayE));
+    }
+
     grid.appendChild(el);
   }
 }
@@ -1628,6 +1729,43 @@ function calNav(dir) {
   if (calMonth > 11) { calMonth = 0; calYear++; }
   if (calMonth < 0) { calMonth = 11; calYear--; }
   renderCalendar();
+  document.getElementById('dayDetail').innerHTML = '';
+}
+
+function showDayDetail(ds, dayEntries) {
+  const container = document.getElementById('dayDetail');
+  const dateObj = new Date(ds + 'T12:00:00');
+  const dateLabel = dateObj.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  const icons = {
+    'resisted': { icon: '\u2714', cls: 'resisted', label: 'Resisted urge' },
+    'slipped': { icon: '\u21BB', cls: 'slipped', label: 'Slipped' },
+    'used-tool': { icon: '\u2714', cls: 'resisted', label: 'Resisted urge' },
+    'clean-day': { icon: '\u2714', cls: 'resisted', label: 'Resisted urge' }
+  };
+
+  let html = '<div class="day-detail">';
+  html += '<div class="day-detail-header"><h3>' + escHtml(dateLabel) + '</h3>';
+  html += '<button class="day-detail-close" onclick="document.getElementById(\'dayDetail\').innerHTML=\'\'">&times;</button></div>';
+
+  dayEntries.sort((a, b) => a.id - b.id).forEach(entry => {
+    const info = icons[entry.type] || { icon: '?', cls: '', label: entry.type };
+    const t = new Date(entry.timestamp);
+    const timeStr = t.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    const trigger = entry.trigger ? ' &middot; ' + escHtml(entry.trigger) : '';
+    const location = entry.location ? ' &middot; ' + escHtml(capitalize(entry.location)) : '';
+    const coping = entry.coping ? ' &middot; ' + escHtml(capitalize(entry.coping)) : '';
+    const note = entry.note ? '<div class="log-note">' + escHtml(entry.note) + '</div>' : '';
+
+    html += '<div class="log-entry">' +
+      '<div class="log-dot ' + info.cls + '">' + info.icon + '</div>' +
+      '<div class="log-info"><div class="log-type">' + info.label + '</div>' +
+      '<div class="log-meta">' + timeStr + trigger + location + coping + '</div>' + note + '</div></div>';
+  });
+
+  html += '</div>';
+  container.innerHTML = html;
+  container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function renderWeekChart() {
@@ -1900,8 +2038,61 @@ function isResisted(entry) {
   return entry.type === 'resisted' || entry.type === 'used-tool' || entry.type === 'clean-day';
 }
 
+const resistedMsgs = [
+  'Urge resisted - nice one',
+  'That urge didn\'t stand a chance',
+  'Another one beaten. Keep building.',
+  'Your nails thank you',
+  'Strong work. Pattern locked in.',
+  'Resisted. You\'re getting stronger.',
+  'Willpower wins again',
+  'Nailed it (pun intended)',
+];
+const slippedMsgs = [
+  'Logged. One slip doesn\'t erase progress.',
+  'Noted - check your trigger, try again.',
+  'Slip logged. You\'re still in this.',
+  'Progress isn\'t perfect. Keep going.',
+  'Logged. Tomorrow is a fresh start.',
+  'One slip, not a reset. Move forward.',
+];
+function randomMsg(type) {
+  const arr = type === 'resisted' ? resistedMsgs : slippedMsgs;
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 function haptic(ms = 10) {
   if (navigator.vibrate) navigator.vibrate(ms);
+}
+
+function playSound(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    gain.gain.value = 0.08;
+
+    if (type === 'resisted') {
+      // Bright rising ding
+      osc.frequency.value = 880;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.25);
+    } else {
+      // Soft low tone
+      osc.frequency.value = 330;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.05, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.2);
+    }
+    setTimeout(() => ctx.close(), 500);
+  } catch (e) { /* Audio not supported */ }
 }
 
 function toast(msg) {
