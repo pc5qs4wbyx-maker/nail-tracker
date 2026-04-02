@@ -444,7 +444,7 @@
   .log-type { font-size: 0.9rem; font-weight: 600; }
   .log-meta { font-size: 0.8rem; color: var(--text-muted); }
   .log-note { font-size: 0.8rem; color: var(--text-secondary); font-style: italic; margin-top: 2px; }
-  .log-del {
+  .log-edit, .log-del {
     background: none;
     border: none;
     color: var(--text-muted);
@@ -778,6 +778,58 @@
     color: var(--text-secondary);
     line-height: 1.5;
   }
+
+  .undo-link {
+    margin-left: 10px;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+    color: var(--primary-light);
+  }
+
+  /* ---- Dark Mode ---- */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1a14;
+      --card: rgba(255,255,255,0.08);
+      --card-border: rgba(255,255,255,0.12);
+      --primary: #5cb88a;
+      --primary-dark: #3d9e6e;
+      --primary-light: #1e3a2b;
+      --primary-faint: rgba(92,184,138,0.15);
+      --accent: #d4a373;
+      --danger: #e06060;
+      --danger-light: rgba(224,96,96,0.15);
+      --warning: #d4aa30;
+      --warning-light: rgba(212,170,48,0.15);
+      --text: #e8e8f0;
+      --text-secondary: #b0b0c4;
+      --text-muted: #7a7a94;
+      --border: rgba(255,255,255,0.1);
+      --shadow-sm: 0 1px 4px rgba(0,0,0,0.4);
+      --shadow: 0 4px 20px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    body {
+      background-image:
+        radial-gradient(ellipse at 20% 0%, rgba(92,184,138,0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 100%, rgba(45,106,79,0.1) 0%, transparent 50%);
+    }
+    .tab-bar {
+      background: rgba(20,30,24,0.85);
+      border-top-color: rgba(255,255,255,0.08);
+    }
+    .modal-overlay { background: rgba(0,0,0,0.6); }
+    .modal-sheet { background: #1a2420; }
+    .cal-cell.no-data { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+    .cal-cell.clean { background: rgba(92,184,138,0.2); color: var(--primary); }
+    .cal-cell.slipped { background: rgba(224,96,96,0.2); color: var(--danger); }
+    .cal-cell.mixed { background: rgba(212,170,48,0.2); color: var(--warning); }
+    .chip { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
+    .chip.selected { background: var(--primary); color: #fff; }
+    .note-input, .datetime-input { background: rgba(255,255,255,0.06); color: var(--text); border-color: rgba(255,255,255,0.1); }
+    .toast { background: rgba(30,40,34,0.95); color: var(--text); }
+  }
 </style>
 </head>
 <body>
@@ -813,11 +865,11 @@
   <div class="card">
     <h2>Log an event</h2>
     <div class="log-grid" style="grid-template-columns:1fr 1fr;">
-      <button class="log-btn btn-resisted" onclick="startLog('resisted')" style="padding:22px 12px;">
-        <span class="icon">&#10004;</span> Resisted urge
+      <button class="log-btn btn-resisted" onclick="startLog('resisted')" style="padding:22px 12px;" aria-label="Log resisted urge">
+        <span class="icon" aria-hidden="true">&#10004;</span> Resisted urge
       </button>
-      <button class="log-btn btn-slipped" onclick="startLog('slipped')" style="padding:22px 12px;">
-        <span class="icon">&#8635;</span> Slipped
+      <button class="log-btn btn-slipped" onclick="startLog('slipped')" style="padding:22px 12px;" aria-label="Log a slip">
+        <span class="icon" aria-hidden="true">&#8635;</span> Slipped
       </button>
     </div>
     <div class="trigger-panel" id="triggerPanel">
@@ -827,21 +879,21 @@
       </div>
       <label>What triggered it?</label>
       <div class="trigger-chips" id="triggerChips">
-        <span class="chip" data-t="stress" onclick="pickTrigger(this)">Stress</span>
-        <span class="chip" data-t="boredom" onclick="pickTrigger(this)">Boredom</span>
-        <span class="chip" data-t="idle" onclick="pickTrigger(this)">Idle hands</span>
-        <span class="chip" data-t="rough-edge" onclick="pickTrigger(this)">Rough edge</span>
-        <span class="chip" data-t="focus" onclick="pickTrigger(this)">Deep focus</span>
+        <span class="chip" role="button" aria-pressed="false" data-t="stress" onclick="pickTrigger(this)">Stress</span>
+        <span class="chip" role="button" aria-pressed="false" data-t="boredom" onclick="pickTrigger(this)">Boredom</span>
+        <span class="chip" role="button" aria-pressed="false" data-t="idle" onclick="pickTrigger(this)">Idle hands</span>
+        <span class="chip" role="button" aria-pressed="false" data-t="rough-edge" onclick="pickTrigger(this)">Rough edge</span>
+        <span class="chip" role="button" aria-pressed="false" data-t="focus" onclick="pickTrigger(this)">Deep focus</span>
       </div>
       <div class="coping-section" id="copingSection" style="display:none;">
         <label>How did you cope?</label>
         <div class="trigger-chips" id="copingChips">
-          <span class="chip" data-c="fist-clench" onclick="pickCoping(this)">Fist clench</span>
-          <span class="chip" data-c="fidget-tool" onclick="pickCoping(this)">Fidget tool</span>
-          <span class="chip" data-c="nail-file" onclick="pickCoping(this)">Nail file</span>
-          <span class="chip" data-c="breathing" onclick="pickCoping(this)">Breathing</span>
-          <span class="chip" data-c="willpower" onclick="pickCoping(this)">Willpower</span>
-          <span class="chip" data-c="other" onclick="pickCoping(this)">Other</span>
+          <span class="chip" role="button" aria-pressed="false" data-c="fist-clench" onclick="pickCoping(this)">Fist clench</span>
+          <span class="chip" role="button" aria-pressed="false" data-c="fidget-tool" onclick="pickCoping(this)">Fidget tool</span>
+          <span class="chip" role="button" aria-pressed="false" data-c="nail-file" onclick="pickCoping(this)">Nail file</span>
+          <span class="chip" role="button" aria-pressed="false" data-c="breathing" onclick="pickCoping(this)">Breathing</span>
+          <span class="chip" role="button" aria-pressed="false" data-c="willpower" onclick="pickCoping(this)">Willpower</span>
+          <span class="chip" role="button" aria-pressed="false" data-c="other" onclick="pickCoping(this)">Other</span>
         </div>
       </div>
       <input class="note-input" id="noteInput" type="text" placeholder="Optional note..." maxlength="120">
@@ -858,9 +910,9 @@
   </div>
   <div class="card">
     <div class="cal-nav">
-      <button class="cal-arrow" onclick="calNav(-1)">&larr;</button>
+      <button class="cal-arrow" onclick="calNav(-1)" aria-label="Previous month">&larr;</button>
       <h2 id="calTitle">April 2026</h2>
-      <button class="cal-arrow" onclick="calNav(1)">&rarr;</button>
+      <button class="cal-arrow" onclick="calNav(1)" aria-label="Next month">&rarr;</button>
     </div>
     <div class="cal-grid" id="calGrid"></div>
     <div class="cal-legend">
@@ -906,6 +958,10 @@
       <div class="empty-icon">&#9200;</div>
       More data needed
     </div>
+  </div>
+  <div class="insight-card">
+    <h3>Weekly trend</h3>
+    <div id="weeklyTrend" style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;"></div>
   </div>
   <div class="insight-card">
     <h3>Summary</h3>
@@ -1068,32 +1124,32 @@
 </div>
 
 <!-- Tab bar -->
-<nav class="tab-bar">
-  <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+<nav class="tab-bar" role="tablist" aria-label="Main navigation">
+  <button class="tab-btn active" onclick="switchTab('log')" id="tab-log" aria-label="Log" role="tab" aria-selected="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
     Log
   </button>
-  <button class="tab-btn" onclick="switchTab('calendar')" id="tab-calendar">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+  <button class="tab-btn" onclick="switchTab('calendar')" id="tab-calendar" aria-label="Calendar" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
     Calendar
   </button>
-  <button class="tab-btn" onclick="switchTab('insights')" id="tab-insights">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+  <button class="tab-btn" onclick="switchTab('insights')" id="tab-insights" aria-label="Insights" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
     Insights
   </button>
-  <button class="tab-btn" onclick="switchTab('history')" id="tab-history">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+  <button class="tab-btn" onclick="switchTab('history')" id="tab-history" aria-label="History" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
     History
   </button>
-  <button class="tab-btn" onclick="switchTab('guide')" id="tab-guide">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+  <button class="tab-btn" onclick="switchTab('guide')" id="tab-guide" aria-label="Guide" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
     Guide
   </button>
 </nav>
 
 <!-- Modal -->
 <div class="modal-overlay" id="modal">
-  <div class="modal-sheet">
+  <div class="modal-sheet" role="dialog" aria-label="Clear all data" aria-modal="true">
     <h3>Clear all data?</h3>
     <p>This will permanently delete all your logged entries and streaks. It cannot be undone.</p>
     <div class="modal-actions">
@@ -1138,6 +1194,15 @@ function dbAdd(entry) {
   });
 }
 
+function dbPut(entry) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).put(entry);
+    tx.oncomplete = () => resolve();
+    tx.onerror = e => reject(e);
+  });
+}
+
 function dbDelete(id) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE, 'readwrite');
@@ -1170,6 +1235,7 @@ let entries = [];
 let pendingType = null;
 let pendingTrigger = null;
 let pendingCoping = null;
+let editingId = null;
 let calYear, calMonth;
 
 // ============ Init ============
@@ -1195,12 +1261,19 @@ async function init() {
 }
 
 // ============ Tab navigation ============
+let activeTab = 'log';
+let dirtyTabs = new Set();
+
 function switchTab(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
   document.getElementById('page-' + name).classList.add('active');
-  document.getElementById('tab-' + name).classList.add('active');
-  renderAll();
+  const tab = document.getElementById('tab-' + name);
+  tab.classList.add('active');
+  tab.setAttribute('aria-selected', 'true');
+  activeTab = name;
+  renderActive();
+  dirtyTabs.delete(name);
 }
 
 // ============ Logging ============
@@ -1226,38 +1299,63 @@ function startLog(type) {
 }
 
 function pickTrigger(el) {
-  document.querySelectorAll('#triggerChips .chip').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('#triggerChips .chip').forEach(c => { c.classList.remove('selected'); c.setAttribute('aria-pressed', 'false'); });
   el.classList.add('selected');
+  el.setAttribute('aria-pressed', 'true');
   pendingTrigger = el.dataset.t;
 }
 
 function pickCoping(el) {
-  document.querySelectorAll('#copingChips .chip').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('#copingChips .chip').forEach(c => { c.classList.remove('selected'); c.setAttribute('aria-pressed', 'false'); });
   el.classList.add('selected');
+  el.setAttribute('aria-pressed', 'true');
   pendingCoping = el.dataset.c;
 }
 
 async function saveEntry() {
   if (!pendingType) return;
 
-  // Use selected datetime or fall back to now
   const dtVal = document.getElementById('entryDateTime').value;
   const entryTime = dtVal ? new Date(dtVal) : new Date();
   const now = new Date();
 
-  const entry = {
-    id: now.getTime(),
-    type: pendingType,
-    trigger: pendingTrigger || null,
-    coping: pendingCoping || null,
-    note: document.getElementById('noteInput')?.value?.trim() || null,
-    timestamp: entryTime.toISOString(),
-    date: formatDate(entryTime),
-    hour: entryTime.getHours()
-  };
-
-  await dbAdd(entry);
-  entries.unshift(entry);
+  if (editingId) {
+    // Update existing entry
+    const idx = entries.findIndex(e => e.id === editingId);
+    if (idx === -1) return;
+    const updated = {
+      ...entries[idx],
+      type: pendingType,
+      trigger: pendingTrigger || null,
+      coping: pendingType === 'resisted' ? (pendingCoping || null) : null,
+      note: document.getElementById('noteInput')?.value?.trim() || null,
+      timestamp: entryTime.toISOString(),
+      date: formatDate(entryTime),
+      hour: entryTime.getHours()
+    };
+    await dbPut(updated);
+    entries[idx] = updated;
+    editingId = null;
+    haptic();
+    toast('Entry updated');
+  } else {
+    // Create new entry
+    const entry = {
+      id: now.getTime(),
+      type: pendingType,
+      trigger: pendingTrigger || null,
+      coping: pendingCoping || null,
+      note: document.getElementById('noteInput')?.value?.trim() || null,
+      timestamp: entryTime.toISOString(),
+      date: formatDate(entryTime),
+      hour: entryTime.getHours()
+    };
+    await dbAdd(entry);
+    entries.unshift(entry);
+    const msgs = { 'resisted': 'Urge resisted - nice one', 'slipped': 'Slip logged. Keep going.' };
+    haptic();
+    toast(msgs[entry.type] || 'Saved');
+  }
 
   pendingType = null;
   pendingTrigger = null;
@@ -1265,20 +1363,84 @@ async function saveEntry() {
   document.getElementById('triggerPanel').classList.remove('visible');
   document.getElementById('copingSection').style.display = 'none';
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
-
-  const msgs = {
-    'resisted': 'Urge resisted - nice one',
-    'slipped': 'Slip logged. Keep going.'
-  };
-  toast(msgs[entry.type] || 'Saved');
   renderAll();
 }
 
+function editEntry(id) {
+  const entry = entries.find(e => e.id === id);
+  if (!entry) return;
+  editingId = id;
+
+  // Switch to log tab
+  switchTab('log');
+
+  // Pre-fill the form
+  pendingType = entry.type;
+  pendingTrigger = entry.trigger;
+  pendingCoping = entry.coping;
+
+  // Set datetime
+  const d = new Date(entry.timestamp);
+  const offset = d.getTimezoneOffset();
+  const local = new Date(d.getTime() - offset * 60000);
+  document.getElementById('entryDateTime').value = local.toISOString().slice(0, 16);
+
+  // Select trigger chip
+  document.querySelectorAll('#triggerChips .chip').forEach(c => {
+    c.classList.toggle('selected', c.dataset.t === entry.trigger);
+  });
+
+  // Show/select coping
+  document.getElementById('copingSection').style.display = isResisted(entry) ? 'block' : 'none';
+  document.querySelectorAll('#copingChips .chip').forEach(c => {
+    c.classList.toggle('selected', c.dataset.c === entry.coping);
+  });
+
+  // Set note
+  document.getElementById('noteInput').value = entry.note || '';
+
+  // Show panel
+  document.getElementById('triggerPanel').classList.add('visible');
+  document.getElementById('triggerPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+let undoEntry = null;
+let undoTimer = null;
+
 async function deleteEntry(id) {
+  const entry = entries.find(e => e.id === id);
+  if (!entry) return;
   await dbDelete(id);
   entries = entries.filter(e => e.id !== id);
+  haptic();
   renderAll();
-  toast('Entry removed');
+
+  // Store for undo
+  undoEntry = entry;
+  clearTimeout(undoTimer);
+  showUndoToast('Entry removed');
+  undoTimer = setTimeout(() => { undoEntry = null; }, 5000);
+}
+
+function showUndoToast(msg) {
+  const t = document.getElementById('toast');
+  t.innerHTML = escHtml(msg) + ' <span class="undo-link" onclick="undoDelete()">Undo</span>';
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 5000);
+}
+
+async function undoDelete() {
+  if (!undoEntry) return;
+  await dbAdd(undoEntry);
+  entries.push(undoEntry);
+  entries.sort((a, b) => b.id - a.id);
+  undoEntry = null;
+  clearTimeout(undoTimer);
+  document.getElementById('toast').classList.remove('show');
+  haptic();
+  renderAll();
+  toast('Entry restored');
 }
 
 // ============ Helpers ============
@@ -1326,7 +1488,8 @@ function getBest() {
     } else if (dayE.length > 0) {
       cur++;
     } else {
-      cur++; // No data = benefit of doubt
+      best = Math.max(best, cur);
+      cur = 0;
     }
     d.setDate(d.getDate() + 1);
   }
@@ -1335,15 +1498,21 @@ function getBest() {
 
 // ============ Renders ============
 function renderAll() {
-  renderStats();
-  renderCalendar();
-  renderWeekChart();
-  renderHistory();
-  renderInsights();
+  dirtyTabs = new Set(['log', 'calendar', 'insights', 'history']);
+  renderActive();
+}
+
+function renderActive() {
+  switch (activeTab) {
+    case 'log': renderStats(); break;
+    case 'calendar': renderCalendar(); renderWeekChart(); break;
+    case 'history': renderHistory(); break;
+    case 'insights': renderInsights(); break;
+  }
 }
 
 function renderStats() {
-  const resisted = entries.filter(e => e.type === 'resisted' || e.type === 'used-tool').length;
+  const resisted = entries.filter(e => isResisted(e)).length;
   const slipped = entries.filter(e => e.type === 'slipped').length;
   const total = resisted + slipped;
   const rate = total > 0 ? Math.round((resisted / total) * 100) + '%' : '--';
@@ -1497,14 +1666,15 @@ function renderHistory() {
       lastDate = entry.date;
     }
 
-    const trigger = entry.trigger ? ' &middot; ' + entry.trigger : '';
-    const coping = entry.coping ? ' &middot; ' + capitalize(entry.coping) : '';
+    const trigger = entry.trigger ? ' &middot; ' + escHtml(entry.trigger) : '';
+    const coping = entry.coping ? ' &middot; ' + escHtml(capitalize(entry.coping)) : '';
     const note = entry.note ? '<div class="log-note">' + escHtml(entry.note) + '</div>' : '';
 
     html += '<div class="log-entry">' +
       '<div class="log-dot ' + info.cls + '">' + info.icon + '</div>' +
       '<div class="log-info"><div class="log-type">' + info.label + '</div>' +
       '<div class="log-meta">' + timeStr + trigger + coping + '</div>' + note + '</div>' +
+      '<button class="log-edit" onclick="editEntry(' + entry.id + ')">&#9998;</button>' +
       '<button class="log-del" onclick="deleteEntry(' + entry.id + ')">&times;</button></div>';
   });
 
@@ -1591,6 +1761,56 @@ function renderInsights() {
     }).join('');
   }
 
+  // Weekly trend
+  const trendEl = document.getElementById('weeklyTrend');
+  const today = new Date();
+  const dayOfWeek = (today.getDay() + 6) % 7;
+
+  function weekEntries(weeksAgo) {
+    const results = { resisted: 0, slipped: 0 };
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - dayOfWeek + i - (weeksAgo * 7));
+      const ds = formatDate(d);
+      entries.filter(e => e.date === ds).forEach(e => {
+        if (isResisted(e)) results.resisted++;
+        else if (e.type === 'slipped') results.slipped++;
+      });
+    }
+    return results;
+  }
+
+  const thisWeek = weekEntries(0);
+  const lastWeek = weekEntries(1);
+  const thisTotal = thisWeek.resisted + thisWeek.slipped;
+  const lastTotal = lastWeek.resisted + lastWeek.slipped;
+
+  if (thisTotal === 0 && lastTotal === 0) {
+    trendEl.textContent = 'Log events this week to see trends.';
+  } else {
+    let trendHtml = '<div style="display:flex;gap:16px;flex-wrap:wrap;">';
+    // This week
+    const thisRate = thisTotal > 0 ? Math.round((thisWeek.resisted / thisTotal) * 100) : 0;
+    const lastRate = lastTotal > 0 ? Math.round((lastWeek.resisted / lastTotal) * 100) : 0;
+    trendHtml += '<div style="flex:1;min-width:100px;"><div style="font-weight:700;font-size:0.8rem;color:var(--text-muted);margin-bottom:4px;">This week</div>';
+    trendHtml += '<div style="font-size:1.3rem;font-weight:700;color:var(--text);">' + thisRate + '%</div>';
+    trendHtml += '<div style="font-size:0.75rem;color:var(--text-muted);">' + thisWeek.resisted + ' resisted, ' + thisWeek.slipped + ' slipped</div></div>';
+    // Last week
+    trendHtml += '<div style="flex:1;min-width:100px;"><div style="font-weight:700;font-size:0.8rem;color:var(--text-muted);margin-bottom:4px;">Last week</div>';
+    trendHtml += '<div style="font-size:1.3rem;font-weight:700;color:var(--text);">' + lastRate + '%</div>';
+    trendHtml += '<div style="font-size:0.75rem;color:var(--text-muted);">' + lastWeek.resisted + ' resisted, ' + lastWeek.slipped + ' slipped</div></div>';
+    // Delta
+    if (lastTotal > 0) {
+      const delta = thisRate - lastRate;
+      const arrow = delta > 0 ? '&#9650;' : delta < 0 ? '&#9660;' : '&#8212;';
+      const color = delta > 0 ? 'var(--primary)' : delta < 0 ? 'var(--danger)' : 'var(--text-muted)';
+      trendHtml += '<div style="flex:1;min-width:80px;text-align:center;"><div style="font-weight:700;font-size:0.8rem;color:var(--text-muted);margin-bottom:4px;">Change</div>';
+      trendHtml += '<div style="font-size:1.3rem;font-weight:700;color:' + color + ';">' + arrow + ' ' + Math.abs(delta) + '%</div></div>';
+    }
+    trendHtml += '</div>';
+    trendEl.innerHTML = trendHtml;
+  }
+
   // Summary
   const summary = document.getElementById('summaryText');
   const total = entries.length;
@@ -1599,7 +1819,7 @@ function renderInsights() {
     return;
   }
 
-  const resisted = entries.filter(e => e.type === 'resisted' || e.type === 'used-tool' || e.type === 'clean-day').length;
+  const resisted = entries.filter(e => isResisted(e)).length;
   const slipped = entries.filter(e => e.type === 'slipped').length;
   const streak = getStreak();
   const topTrigger = Object.entries(triggerCounts).sort((a, b) => b[1] - a[1])[0];
@@ -1629,7 +1849,15 @@ function escHtml(s) {
 }
 
 function capitalize(s) {
-  return s.charAt(0).toUpperCase() + s.slice(1).replace('-', ' ');
+  return s.charAt(0).toUpperCase() + s.slice(1).replaceAll('-', ' ');
+}
+
+function isResisted(entry) {
+  return entry.type === 'resisted' || entry.type === 'used-tool' || entry.type === 'clean-day';
+}
+
+function haptic(ms = 10) {
+  if (navigator.vibrate) navigator.vibrate(ms);
 }
 
 function toast(msg) {
