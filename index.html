@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Nail Tracker">
+<meta name="apple-mobile-web-app-title" content="Soothing Hands">
 <meta name="theme-color" content="#1a4731">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Nail Tracker</title>
+<title>Soothing Hands</title>
 <style>
   :root {
     --bg: #e8efe8;
@@ -222,7 +222,7 @@
     user-select: none;
   }
   .log-btn:active { transform: scale(0.95); opacity: 0.8; }
-  .log-btn .icon { font-size: 1.6rem; }
+  .log-btn .icon { font-size: 1.6rem; color: inherit; }
   .btn-resisted {
     background: rgba(45,106,79,0.85);
     border: 0.5px solid rgba(45,106,79,0.3);
@@ -912,7 +912,7 @@
 <!-- ============ LOG PAGE ============ -->
 <div class="page active" id="page-log">
   <div class="page-header">
-    <h1>Nail Tracker</h1>
+    <h1>Log</h1>
     <p id="todayDate"></p>
   </div>
 
@@ -941,7 +941,7 @@
     <h2>Log an event</h2>
     <div class="log-grid" style="grid-template-columns:1fr 1fr;">
       <button class="log-btn btn-resisted" onclick="startLog('resisted')" style="padding:22px 12px;" aria-label="Log resisted urge">
-        <span class="icon" aria-hidden="true">&#10004;</span> Resisted urge
+        <span class="icon" aria-hidden="true">&#10003;</span> Resisted urge
       </button>
       <button class="log-btn btn-slipped" onclick="startLog('slipped')" style="padding:22px 12px;" aria-label="Log a slip">
         <span class="icon" aria-hidden="true">&#8635;</span> Slipped

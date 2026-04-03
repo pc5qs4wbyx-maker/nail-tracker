@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nail-tracker-v5';
+const CACHE_NAME = 'soothing-hands-v1';
 const ASSETS = [
   './',
   './index.html',

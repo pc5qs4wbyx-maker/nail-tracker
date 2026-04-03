@@ -1,6 +1,6 @@
 {
-  "name": "Nail Tracker",
-  "short_name": "Nail Tracker",
+  "name": "Soothing Hands",
+  "short_name": "Soothing Hands",
   "description": "Track urges, log streaks, break the habit",
   "start_url": "./index.html",
   "display": "standalone",
