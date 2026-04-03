@@ -235,12 +235,19 @@
     color: white;
     box-shadow: 0 2px 8px rgba(208,48,48,0.25);
   }
-  .trigger-panel.slipped-bg {
-    background: rgba(214,69,69,0.06);
-    border-radius: var(--radius-sm);
-    margin-top: 14px;
-    padding: 14px;
-    border-top: none;
+  .card.slipped-card {
+    background: rgba(214,69,69,0.08);
+    border-color: rgba(214,69,69,0.15);
+  }
+  .card.slipped-card .chip.selected {
+    background: #d03030;
+    color: white;
+    border-color: #c02020;
+  }
+  .card.slipped-card .save-btn {
+    background: #d03030;
+    border-color: #c02020;
+    box-shadow: 0 2px 8px rgba(208,48,48,0.25);
   }
 
   /* ---- Trigger picker ---- */
@@ -892,7 +899,9 @@
     .chip.selected { background: var(--primary); color: #fff; }
     .note-input, .datetime-input { background: rgba(255,255,255,0.06); color: var(--text); border-color: rgba(255,255,255,0.1); }
     .toast { background: rgba(30,40,34,0.95); color: var(--text); }
-    .trigger-panel.slipped-bg { background: rgba(224,96,96,0.08); }
+    .card.slipped-card { background: rgba(224,96,96,0.1); border-color: rgba(224,96,96,0.15); }
+    .card.slipped-card .chip.selected { background: #d03030; border-color: #c02020; }
+    .card.slipped-card .save-btn { background: #d03030; border-color: #c02020; }
     .day-detail { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); }
     .streak-banner.milestone { box-shadow: var(--shadow), 0 0 20px rgba(92,184,138,0.25); }
   }
@@ -928,7 +937,7 @@
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" id="logCard">
     <h2>Log an event</h2>
     <div class="log-grid" style="grid-template-columns:1fr 1fr;">
       <button class="log-btn btn-resisted" onclick="startLog('resisted')" style="padding:22px 12px;" aria-label="Log resisted urge">
@@ -1366,9 +1375,9 @@ function startLog(type) {
   // Show coping methods only for resisted
   document.getElementById('copingSection').style.display = (type === 'resisted') ? 'block' : 'none';
 
-  // Tint background for slipped
+  // Tint entire log card for slipped
+  document.getElementById('logCard').classList.toggle('slipped-card', type === 'slipped');
   const panel = document.getElementById('triggerPanel');
-  panel.classList.toggle('slipped-bg', type === 'slipped');
   panel.classList.add('visible');
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -1448,7 +1457,7 @@ async function saveEntry() {
   pendingLocation = null;
   const panel = document.getElementById('triggerPanel');
   panel.classList.remove('visible');
-  panel.classList.remove('slipped-bg');
+  document.getElementById('logCard').classList.remove('slipped-card');
   document.getElementById('copingSection').style.display = 'none';
   document.querySelectorAll('.chip').forEach(c => { c.classList.remove('selected'); c.setAttribute('aria-pressed', 'false'); });
   renderAll();
@@ -1500,8 +1509,8 @@ function editEntry(id) {
   document.getElementById('noteInput').value = entry.note || '';
 
   // Show panel with correct background
+  document.getElementById('logCard').classList.toggle('slipped-card', entry.type === 'slipped');
   const panel = document.getElementById('triggerPanel');
-  panel.classList.toggle('slipped-bg', entry.type === 'slipped');
   panel.classList.add('visible');
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -1510,6 +1519,7 @@ let undoEntry = null;
 let undoTimer = null;
 
 async function deleteEntry(id) {
+  if (!confirm('Delete this entry?')) return;
   const entry = entries.find(e => e.id === id);
   if (!entry) return;
   await dbDelete(id);
